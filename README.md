@@ -79,6 +79,10 @@ vsce package
 code --install-extension helix-nix-vscode-*.vsix
 ```
 
+Publishing to the Marketplace uses `vsce publish`. After December 1, 2026,
+Azure DevOps stops issuing the global tokens `vsce login` relies on; publish
+with `vsce publish --azure-credential` after `az login` instead.
+
 ## Licenses
 
 MIT, except the Helix queries and metadata under `languages/`, which are
