@@ -9,3 +9,4 @@ result*
 **/*.d.cts
 node_modules/web-tree-sitter/debug/**
 node_modules/web-tree-sitter/web-tree-sitter.js
+DEVELOPMENT.md
