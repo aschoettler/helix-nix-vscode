@@ -2,7 +2,7 @@
   "name": "helix-nix-vscode",
   "displayName": "Helix Nix Highlighting",
   "description": "Highlights Nix, and languages embedded in Nix strings, with tree-sitter and Helix's queries, as semantic tokens.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "aschoettler",
   "license": "MIT",
   "repository": {

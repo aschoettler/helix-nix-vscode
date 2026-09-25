@@ -13,6 +13,10 @@ Nix colors. Injections work for the languages bundled under `languages/`:
 Nix, bash, Python, JSON, TOML, regex and markdown. Python resolves locals as
 Helix does, so a parameter keeps its color where it is used.
 
+One rule departs from Helix. `overrides/nix/injections.scm` is appended to
+Helix's Nix injection query and makes `testScript` Python. In Helix, a later
+pattern for `*Script` attributes claims it as bash.
+
 It needs [Nix IDE](https://marketplace.visualstudio.com/items?itemName=jnoortheen.nix-ide),
 which provides the `nix` language, the language server, and the base
 TextMate colors. This extension only adds the semantic token layer. It turns

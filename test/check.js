@@ -58,12 +58,15 @@ const { declare } = require('../scripts/declare-tokens');
     inNested[`${line}:${nestedLines[line].substr(ch, len)}`] = h.legend.types[type];
   }
   const expectNested = {
-    '3:machine': 'variable-parameter',
-    '2:os': 'namespace',
-    '12:name': 'variable-other-member',
-    '16: Title': 'markup-heading-1',
-    '17:bold': 'markup-bold',
-    '19:echo': 'function-builtin',
+    // testScript is Python, not bash; see overrides/nix/injections.scm.
+    '2:machine': 'variable',
+    '2:succeed': 'function-method',
+    '6:machine': 'variable-parameter',
+    '5:os': 'namespace',
+    '15:name': 'variable-other-member',
+    '19: Title': 'markup-heading-1',
+    '20:bold': 'markup-bold',
+    '22:echo': 'function-builtin',
   };
   for (const [k, v] of Object.entries(expectNested)) assert.strictEqual(inNested[k], v, k);
   console.log('ok');

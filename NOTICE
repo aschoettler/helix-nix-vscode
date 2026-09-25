@@ -5,6 +5,7 @@ as packaged by nixpkgs:
   runtime/queries, under the Mozilla Public License 2.0:
   https://mozilla.org/MPL/2.0/
 - languages/languages.json is derived from Helix's languages.toml (MPL-2.0).
+- overrides/*/*.scm adapt patterns from Helix's queries, also MPL-2.0.
 - languages/*/grammar.wasm are built from the tree-sitter grammars Helix pins
   for Nix, bash, Python, JSON, TOML, regex and markdown, all MIT licensed.
 

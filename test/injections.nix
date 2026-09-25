@@ -1,4 +1,7 @@
 {
+  testScript = ''
+    machine.succeed("true")
+  '';
   script = pkgs.writers.writePython3 "check" { } ''
     import os
     def check(machine, retries=3):

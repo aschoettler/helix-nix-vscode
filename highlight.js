@@ -7,6 +7,8 @@ const path = require('path');
 const { Parser, Language, Query } = require('web-tree-sitter');
 
 const LANGUAGES = path.join(__dirname, 'languages');
+// This extension's own query patterns, appended after Helix's.
+const OVERRIDES = path.join(__dirname, 'overrides');
 const MAX_INJECTION_DEPTH = 4;
 
 // Helix's shebang pattern: the interpreter name after an optional path and `env`.
@@ -44,7 +46,9 @@ function readLanguages() {
       dir,
       injectionRegex: m.injectionRegex ? new RegExp(m.injectionRegex) : null,
       highlightsText: readQueryText(dir, 'highlights.scm'),
-      injectionsText: readQueryText(dir, 'injections.scm'),
+      injectionsText: [readQueryText(dir, 'injections.scm'), readQueryText(path.join(OVERRIDES, m.name), 'injections.scm')]
+        .filter(Boolean)
+        .join('\n') || null,
       localsText: readQueryText(dir, 'locals.scm'),
       loaded: null,
     });
