@@ -1,0 +1,177 @@
+{
+  "name": "helix-nix-vscode",
+  "displayName": "Helix Nix Highlighting",
+  "description": "Highlights Nix with tree-sitter and Helix's highlight query, as semantic tokens.",
+  "version": "0.1.0",
+  "publisher": "aschoettler",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aschoettler/helix-nix-vscode.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:nix"
+  ],
+  "extensionDependencies": [
+    "jnoortheen.nix-ide"
+  ],
+  "dependencies": {
+    "web-tree-sitter": "0.27.0"
+  },
+  "contributes": {
+    "semanticTokenTypes": [
+      {
+        "id": "punctuation",
+        "description": "Helix capture `punctuation`."
+      },
+      {
+        "id": "constant",
+        "description": "Helix capture `constant`."
+      },
+      {
+        "id": "embedded",
+        "description": "Helix capture `embedded`."
+      }
+    ],
+    "semanticTokenModifiers": [
+      {
+        "id": "delimiter",
+        "description": "Helix capture segment `delimiter`."
+      },
+      {
+        "id": "bracket",
+        "description": "Helix capture segment `bracket`."
+      },
+      {
+        "id": "control",
+        "description": "Helix capture segment `control`."
+      },
+      {
+        "id": "exception",
+        "description": "Helix capture segment `exception`."
+      },
+      {
+        "id": "operator",
+        "description": "Helix capture segment `operator`."
+      },
+      {
+        "id": "repeat",
+        "description": "Helix capture segment `repeat`."
+      },
+      {
+        "id": "conditional",
+        "description": "Helix capture segment `conditional`."
+      },
+      {
+        "id": "other",
+        "description": "Helix capture segment `other`."
+      },
+      {
+        "id": "member",
+        "description": "Helix capture segment `member`."
+      },
+      {
+        "id": "builtin",
+        "description": "Helix capture segment `builtin`."
+      },
+      {
+        "id": "special",
+        "description": "Helix capture segment `special`."
+      },
+      {
+        "id": "path",
+        "description": "Helix capture segment `path`."
+      },
+      {
+        "id": "uri",
+        "description": "Helix capture segment `uri`."
+      },
+      {
+        "id": "boolean",
+        "description": "Helix capture segment `boolean`."
+      },
+      {
+        "id": "numeric",
+        "description": "Helix capture segment `numeric`."
+      },
+      {
+        "id": "integer",
+        "description": "Helix capture segment `integer`."
+      },
+      {
+        "id": "float",
+        "description": "Helix capture segment `float`."
+      },
+      {
+        "id": "character",
+        "description": "Helix capture segment `character`."
+      },
+      {
+        "id": "escape",
+        "description": "Helix capture segment `escape`."
+      },
+      {
+        "id": "parameter",
+        "description": "Helix capture segment `parameter`."
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "nix",
+        "scopes": {
+          "punctuation": [
+            "punctuation"
+          ],
+          "constant": [
+            "constant.language"
+          ],
+          "constant.numeric": [
+            "constant.numeric"
+          ],
+          "constant.character.escape": [
+            "constant.character.escape"
+          ],
+          "embedded": [
+            "meta.embedded"
+          ],
+          "keyword.operator": [
+            "keyword.operator"
+          ],
+          "variable.member": [
+            "variable.other.member"
+          ],
+          "variable.builtin": [
+            "variable.language"
+          ],
+          "variable.parameter": [
+            "variable.parameter"
+          ],
+          "function.builtin": [
+            "support.function"
+          ],
+          "string.path": [
+            "string.unquoted.path"
+          ],
+          "string.uri": [
+            "string.unquoted.uri"
+          ]
+        }
+      }
+    ],
+    "configurationDefaults": {
+      "[nix]": {
+        "editor.semanticHighlighting.enabled": true
+      }
+    }
+  },
+  "scripts": {
+    "test": "node test/check.js"
+  }
+}

@@ -1,0 +1,11 @@
+.gitignore
+flake.nix
+flake.lock
+scripts/**
+test/**
+result*
+**/*.map
+**/*.d.ts
+**/*.d.cts
+node_modules/web-tree-sitter/debug/**
+node_modules/web-tree-sitter/web-tree-sitter.js
