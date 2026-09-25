@@ -5,6 +5,12 @@ tree-sitter-nix, runs Helix's `highlights.scm`, and hands the result to VS Code
 as semantic tokens. A TextMate grammar can't tell `nullOr` in
 `types.nullOr types.str` from `str`; the parse tree can.
 
+It also runs Helix's Nix `injections.scm`, so a string Helix treats as
+another language is colored as that language. For example, `postActivation`,
+`buildPhase` and `writeShellScript` strings are colored as bash. Nix
+interpolations inside them keep their Nix colors. Injections work for the
+languages bundled under `languages/`: Nix and bash.
+
 It needs [Nix IDE](https://marketplace.visualstudio.com/items?itemName=jnoortheen.nix-ide),
 which provides the `nix` language, the language server, and the base
 TextMate colors. This extension only adds the semantic token layer. It turns
@@ -31,17 +37,20 @@ members.
 Overlapping captures resolve as in Helix. On the same range, the highest
 pattern index wins. A nested range colors its own text.
 
-## Updating the grammar and query
+## Updating grammars and queries
 
-`scripts/refresh.sh` rebuilds `grammar/tree-sitter-nix.wasm` and copies
-`queries/highlights.scm` from nixpkgs' Helix. It takes an optional nixpkgs
-flake ref to match a specific Helix build:
+`scripts/refresh.sh` rebuilds `languages/` from nixpkgs' Helix: each
+language's grammar as WASM, its Helix queries, and `languages.json`, which
+holds the Helix metadata used to resolve injection languages. It pins
+nixpkgs-unstable by default, or takes a nixpkgs flake ref to match a specific
+Helix build:
 
 ```sh
 scripts/refresh.sh github:NixOS/nixpkgs/<rev>
 ```
 
-`SOURCES` records the Helix version and grammar revision.
+`SOURCES` records the Helix version and grammar revisions. To bundle another
+injection language, add it to `languages` in `flake.nix` and refresh.
 
 ## Building
 
@@ -55,5 +64,5 @@ code --install-extension helix-nix-vscode-*.vsix
 
 ## Licenses
 
-MIT, except `queries/highlights.scm`, which comes from Helix under MPL-2.0.
-See `queries/NOTICE`.
+MIT, except the Helix queries and metadata under `languages/`, which are
+MPL-2.0. See `NOTICE`.

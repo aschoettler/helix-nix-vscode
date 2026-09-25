@@ -39,6 +39,23 @@ const STANDARD_TYPES = new Set([
     '3:enable': 'variable.other.member',
   };
   for (const [k, v] of Object.entries(expect)) assert.strictEqual(got[k], v, k);
+
+  // A `postActivation` string is bash per Helix's injection query. The Nix
+  // interpolation inside it stays Nix.
+  const script = '{\n  a.postActivation = \'\'\n    mkdir -p "${pkgs.x}/bin"\n  \'\';\n}\n';
+  const scriptLines = script.split('\n');
+  const inScript = {};
+  for (const [line, ch, len, type, bits] of h.tokens(script)) {
+    const mods = h.legend.modifiers.filter((_, i) => bits & (1 << i));
+    inScript[`${line}:${scriptLines[line].substr(ch, len)}`] = [h.legend.types[type], ...mods].join('.');
+  }
+  const expectScript = {
+    '2:mkdir': 'function',
+    '2:-p': 'variable.parameter',
+    '2:pkgs': 'variable',
+    '2:x': 'variable.other.member',
+  };
+  for (const [k, v] of Object.entries(expectScript)) assert.strictEqual(inScript[k], v, k);
   console.log('ok');
 })().catch((e) => {
   console.error(e.message);

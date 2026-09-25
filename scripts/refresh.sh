@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
-# Rebuilds the grammar and query from nixpkgs' Helix and copies them into the
-# repo. With no argument, updates nixpkgs to the latest locked branch. With a
-# flake ref, pins nixpkgs to it, e.g. github:NixOS/nixpkgs/<rev>.
+# Rebuilds grammars and queries from nixpkgs' Helix and copies them into the
+# repo. Takes an optional nixpkgs flake ref; defaults to nixpkgs-unstable.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if [ $# -gt 0 ]; then
-  nix flake lock --override-input nixpkgs "$1"
-else
-  nix flake update nixpkgs
-fi
+nix flake lock --override-input nixpkgs "${1:-github:NixOS/nixpkgs/nixpkgs-unstable}"
 
 out=$(nix build --no-link --print-out-paths .#assets)
-install -m 644 "$out/grammar/tree-sitter-nix.wasm" grammar/
-install -m 644 "$out/queries/highlights.scm" queries/
+rm -rf languages
+cp -r "$out/languages" languages
+chmod -R u+w languages
 install -m 644 "$out/SOURCES" SOURCES
 cat SOURCES

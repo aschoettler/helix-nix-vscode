@@ -1,8 +1,0 @@
-highlights.scm is copied unmodified from Helix (https://github.com/helix-editor/helix,
-runtime/queries/nix/highlights.scm) and is licensed under the Mozilla Public
-License 2.0: https://mozilla.org/MPL/2.0/
-
-grammar/tree-sitter-nix.wasm is built from tree-sitter-nix
-(https://github.com/nix-community/tree-sitter-nix), MIT License.
-
-SOURCES at the repo root records the Helix version and grammar revision.

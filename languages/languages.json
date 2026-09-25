@@ -1,0 +1,43 @@
+[
+  {
+    "name": "nix",
+    "injectionRegex": "nix",
+    "shebangs": [],
+    "fileTypes": [
+      "nix"
+    ]
+  },
+  {
+    "name": "bash",
+    "injectionRegex": "(shell|bash|zsh|sh)",
+    "shebangs": [
+      "sh",
+      "bash",
+      "dash",
+      "zsh"
+    ],
+    "fileTypes": [
+      "sh",
+      "bash",
+      "ash",
+      "dash",
+      "ksh",
+      "mksh",
+      "zsh",
+      "zshenv",
+      "zlogin",
+      "zlogout",
+      "zprofile",
+      "zshrc",
+      "eclass",
+      "ebuild",
+      "bazelrc",
+      "Renviron",
+      "zsh-theme",
+      "cshrc",
+      "tcshrc",
+      "bashrc_Apple_Terminal",
+      "zshrc_Apple_Terminal"
+    ]
+  }
+]

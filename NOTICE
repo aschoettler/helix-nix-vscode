@@ -1,0 +1,12 @@
+Files under languages/ come from Helix (https://github.com/helix-editor/helix)
+as packaged by nixpkgs:
+
+- languages/*/highlights.scm and languages/*/injections.scm are copied
+  unmodified from Helix's runtime/queries and are licensed under the Mozilla
+  Public License 2.0: https://mozilla.org/MPL/2.0/
+- languages/languages.json is derived from Helix's languages.toml (MPL-2.0).
+- languages/*/grammar.wasm are built from the tree-sitter grammars Helix pins:
+  tree-sitter-nix (https://github.com/nix-community/tree-sitter-nix) and
+  tree-sitter-bash (https://github.com/tree-sitter/tree-sitter-bash), both MIT.
+
+SOURCES records the Helix version and grammar revisions.

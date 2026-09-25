@@ -1,8 +1,8 @@
 {
   "name": "helix-nix-vscode",
   "displayName": "Helix Nix Highlighting",
-  "description": "Highlights Nix with tree-sitter and Helix's highlight query, as semantic tokens.",
-  "version": "0.1.0",
+  "description": "Highlights Nix, and languages embedded in Nix strings, with tree-sitter and Helix's queries, as semantic tokens.",
+  "version": "0.2.0",
   "publisher": "aschoettler",
   "license": "MIT",
   "repository": {
@@ -120,6 +120,18 @@
       {
         "id": "parameter",
         "description": "Helix capture segment `parameter`."
+      },
+      {
+        "id": "import",
+        "description": "Helix capture segment `import`."
+      },
+      {
+        "id": "function",
+        "description": "Helix capture segment `function`."
+      },
+      {
+        "id": "regexp",
+        "description": "Helix capture segment `regexp`."
       }
     ],
     "semanticTokenScopes": [
@@ -161,6 +173,9 @@
           ],
           "string.uri": [
             "string.unquoted.uri"
+          ],
+          "string.regexp": [
+            "string.regexp"
           ]
         }
       }
