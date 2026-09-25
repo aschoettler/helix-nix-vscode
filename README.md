@@ -29,12 +29,28 @@ Each Helix capture name is a token type with dots turned into dashes:
 prefix as `superType`, so a theme rule for `variable` also colors
 `variable-other-member`, and the most specific rule wins, as in Helix.
 
+In a theme file:
+
 ```jsonc
-"semanticTokenColors": {
-  "function:nix": "#6DB3F2",
-  "variable:nix": "#DCDFE4",
-  "variable-other-member:nix": "#F7768E",
-  "markup-heading:nix": { "foreground": "#F7768E", "bold": true }
+{
+  "semanticTokenColors": {
+    "function:nix": "#6DB3F2",
+    "variable:nix": "#DCDFE4",
+    "variable-other-member:nix": "#F7768E",
+    "markup-heading:nix": { "foreground": "#F7768E", "bold": true }
+  }
+}
+```
+
+Or on top of any theme, in `settings.json`:
+
+```jsonc
+{
+  "editor.semanticTokenColorCustomizations": {
+    "rules": {
+      "variable-other-member:nix": "#F7768E"
+    }
+  }
 }
 ```
 
