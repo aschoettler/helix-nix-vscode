@@ -23,8 +23,24 @@
           languages = [
             "nix"
             "bash"
+            "python"
+            "json"
+            "toml"
+            "regex"
+            "markdown"
+            "markdown.inline"
           ];
-          grammar = name: pkgs.helix.tree-sitter-grammars."tree-sitter-${name}";
+          helixLanguages = (builtins.fromTOML (builtins.readFile "${pkgs.helix-unwrapped.src}/languages.toml")).language;
+          # A Helix language names its grammar, which defaults to the language name.
+          # nixpkgs spells grammar attributes with dashes.
+          grammar =
+            name:
+            let
+              entry = pkgs.lib.findFirst (l: l.name == name) (throw "no Helix language ${name}") helixLanguages;
+            in
+            pkgs.helix.tree-sitter-grammars."tree-sitter-${
+              builtins.replaceStrings [ "_" ] [ "-" ] (entry.grammar or name)
+            }";
           wasiCc = pkgs.pkgsCross.wasi32.stdenv.cc;
         in
         {
@@ -53,12 +69,12 @@
               tree-sitter build --wasm -o $dir/grammar.wasm src-${name}/${
                 if (grammar name).location == null then "" else (grammar name).location
               }
-              for q in highlights injections; do
+              for q in highlights injections locals; do
                 if [ -e ${pkgs.helix.runtime}/queries/${name}/$q.scm ]; then
                   cp ${pkgs.helix.runtime}/queries/${name}/$q.scm $dir/
                 fi
               done
-              echo "tree-sitter-${name} ${(grammar name).src.rev}" >> sources
+              echo "${(grammar name).pname or (grammar name).name} ${(grammar name).src.rev}" >> sources
             '') languages}
 
             yq -p toml -o json '[.language[] | select(.name == (${

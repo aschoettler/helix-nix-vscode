@@ -2,7 +2,7 @@
   "name": "helix-nix-vscode",
   "displayName": "Helix Nix Highlighting",
   "description": "Highlights Nix, and languages embedded in Nix strings, with tree-sitter and Helix's queries, as semantic tokens.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "aschoettler",
   "license": "MIT",
   "repository": {
@@ -28,154 +28,482 @@
   "contributes": {
     "semanticTokenTypes": [
       {
-        "id": "punctuation",
-        "description": "Helix capture `punctuation`."
+        "id": "variable-other",
+        "description": "Helix capture `variable.other`.",
+        "superType": "variable"
+      },
+      {
+        "id": "variable-other-member",
+        "description": "Helix capture `variable.other.member`.",
+        "superType": "variable-other"
       },
       {
         "id": "constant",
         "description": "Helix capture `constant`."
       },
       {
+        "id": "constant-builtin",
+        "description": "Helix capture `constant.builtin`.",
+        "superType": "constant"
+      },
+      {
+        "id": "constant-builtin-boolean",
+        "description": "Helix capture `constant.builtin.boolean`.",
+        "superType": "constant-builtin"
+      },
+      {
+        "id": "constant-numeric",
+        "description": "Helix capture `constant.numeric`.",
+        "superType": "constant"
+      },
+      {
+        "id": "constant-numeric-integer",
+        "description": "Helix capture `constant.numeric.integer`.",
+        "superType": "constant-numeric"
+      },
+      {
+        "id": "constant-numeric-float",
+        "description": "Helix capture `constant.numeric.float`.",
+        "superType": "constant-numeric"
+      },
+      {
+        "id": "string-special",
+        "description": "Helix capture `string.special`.",
+        "superType": "string"
+      },
+      {
+        "id": "punctuation",
+        "description": "Helix capture `punctuation`."
+      },
+      {
+        "id": "punctuation-delimiter",
+        "description": "Helix capture `punctuation.delimiter`.",
+        "superType": "punctuation"
+      },
+      {
+        "id": "punctuation-bracket",
+        "description": "Helix capture `punctuation.bracket`.",
+        "superType": "punctuation"
+      },
+      {
+        "id": "constant-character",
+        "description": "Helix capture `constant.character`.",
+        "superType": "constant"
+      },
+      {
+        "id": "constant-character-escape",
+        "description": "Helix capture `constant.character.escape`.",
+        "superType": "constant-character"
+      },
+      {
+        "id": "punctuation-special",
+        "description": "Helix capture `punctuation.special`.",
+        "superType": "punctuation"
+      },
+      {
+        "id": "variable-parameter",
+        "description": "Helix capture `variable.parameter`.",
+        "superType": "variable"
+      },
+      {
+        "id": "variable-builtin",
+        "description": "Helix capture `variable.builtin`.",
+        "superType": "variable"
+      },
+      {
+        "id": "keyword-operator",
+        "description": "Helix capture `keyword.operator`.",
+        "superType": "keyword"
+      },
+      {
+        "id": "keyword-control",
+        "description": "Helix capture `keyword.control`.",
+        "superType": "keyword"
+      },
+      {
+        "id": "keyword-control-conditional",
+        "description": "Helix capture `keyword.control.conditional`.",
+        "superType": "keyword-control"
+      },
+      {
+        "id": "keyword-control-exception",
+        "description": "Helix capture `keyword.control.exception`.",
+        "superType": "keyword-control"
+      },
+      {
+        "id": "keyword-function",
+        "description": "Helix capture `keyword.function`.",
+        "superType": "keyword"
+      },
+      {
+        "id": "keyword-control-import",
+        "description": "Helix capture `keyword.control.import`.",
+        "superType": "keyword-control"
+      },
+      {
+        "id": "keyword-control-repeat",
+        "description": "Helix capture `keyword.control.repeat`.",
+        "superType": "keyword-control"
+      },
+      {
+        "id": "keyword-control-return",
+        "description": "Helix capture `keyword.control.return`.",
+        "superType": "keyword-control"
+      },
+      {
+        "id": "function-method",
+        "description": "Helix capture `function.method`.",
+        "superType": "function"
+      },
+      {
+        "id": "function-builtin",
+        "description": "Helix capture `function.builtin`.",
+        "superType": "function"
+      },
+      {
+        "id": "constructor",
+        "description": "Helix capture `constructor`."
+      },
+      {
+        "id": "type-builtin",
+        "description": "Helix capture `type.builtin`.",
+        "superType": "type"
+      },
+      {
+        "id": "string-special-path",
+        "description": "Helix capture `string.special.path`.",
+        "superType": "string-special"
+      },
+      {
+        "id": "string-special-uri",
+        "description": "Helix capture `string.special.uri`.",
+        "superType": "string-special"
+      },
+      {
         "id": "embedded",
         "description": "Helix capture `embedded`."
-      }
-    ],
-    "semanticTokenModifiers": [
-      {
-        "id": "delimiter",
-        "description": "Helix capture segment `delimiter`."
       },
       {
-        "id": "bracket",
-        "description": "Helix capture segment `bracket`."
+        "id": "string-regexp",
+        "description": "Helix capture `string.regexp`.",
+        "superType": "string"
       },
       {
-        "id": "control",
-        "description": "Helix capture segment `control`."
+        "id": "markup",
+        "description": "Helix capture `markup`."
       },
       {
-        "id": "exception",
-        "description": "Helix capture segment `exception`."
+        "id": "markup-heading",
+        "description": "Helix capture `markup.heading`.",
+        "superType": "markup"
       },
       {
-        "id": "operator",
-        "description": "Helix capture segment `operator`."
+        "id": "markup-heading-1",
+        "description": "Helix capture `markup.heading.1`.",
+        "superType": "markup-heading"
       },
       {
-        "id": "repeat",
-        "description": "Helix capture segment `repeat`."
+        "id": "markup-heading-marker",
+        "description": "Helix capture `markup.heading.marker`.",
+        "superType": "markup-heading"
       },
       {
-        "id": "conditional",
-        "description": "Helix capture segment `conditional`."
+        "id": "markup-heading-2",
+        "description": "Helix capture `markup.heading.2`.",
+        "superType": "markup-heading"
       },
       {
-        "id": "other",
-        "description": "Helix capture segment `other`."
+        "id": "markup-heading-3",
+        "description": "Helix capture `markup.heading.3`.",
+        "superType": "markup-heading"
       },
       {
-        "id": "member",
-        "description": "Helix capture segment `member`."
+        "id": "markup-heading-4",
+        "description": "Helix capture `markup.heading.4`.",
+        "superType": "markup-heading"
       },
       {
-        "id": "builtin",
-        "description": "Helix capture segment `builtin`."
+        "id": "markup-heading-5",
+        "description": "Helix capture `markup.heading.5`.",
+        "superType": "markup-heading"
       },
       {
-        "id": "special",
-        "description": "Helix capture segment `special`."
+        "id": "markup-heading-6",
+        "description": "Helix capture `markup.heading.6`.",
+        "superType": "markup-heading"
       },
       {
-        "id": "path",
-        "description": "Helix capture segment `path`."
+        "id": "markup-raw",
+        "description": "Helix capture `markup.raw`.",
+        "superType": "markup"
       },
       {
-        "id": "uri",
-        "description": "Helix capture segment `uri`."
+        "id": "markup-raw-block",
+        "description": "Helix capture `markup.raw.block`.",
+        "superType": "markup-raw"
       },
       {
-        "id": "boolean",
-        "description": "Helix capture segment `boolean`."
+        "id": "markup-link",
+        "description": "Helix capture `markup.link`.",
+        "superType": "markup"
       },
       {
-        "id": "numeric",
-        "description": "Helix capture segment `numeric`."
+        "id": "markup-link-url",
+        "description": "Helix capture `markup.link.url`.",
+        "superType": "markup-link"
       },
       {
-        "id": "integer",
-        "description": "Helix capture segment `integer`."
+        "id": "markup-link-label",
+        "description": "Helix capture `markup.link.label`.",
+        "superType": "markup-link"
       },
       {
-        "id": "float",
-        "description": "Helix capture segment `float`."
+        "id": "markup-list",
+        "description": "Helix capture `markup.list`.",
+        "superType": "markup"
       },
       {
-        "id": "character",
-        "description": "Helix capture segment `character`."
+        "id": "markup-list-unnumbered",
+        "description": "Helix capture `markup.list.unnumbered`.",
+        "superType": "markup-list"
       },
       {
-        "id": "escape",
-        "description": "Helix capture segment `escape`."
+        "id": "markup-list-numbered",
+        "description": "Helix capture `markup.list.numbered`.",
+        "superType": "markup-list"
       },
       {
-        "id": "parameter",
-        "description": "Helix capture segment `parameter`."
+        "id": "markup-list-checked",
+        "description": "Helix capture `markup.list.checked`.",
+        "superType": "markup-list"
       },
       {
-        "id": "import",
-        "description": "Helix capture segment `import`."
+        "id": "markup-list-unchecked",
+        "description": "Helix capture `markup.list.unchecked`.",
+        "superType": "markup-list"
       },
       {
-        "id": "function",
-        "description": "Helix capture segment `function`."
+        "id": "string-escape",
+        "description": "Helix capture `string.escape`.",
+        "superType": "string"
       },
       {
-        "id": "regexp",
-        "description": "Helix capture segment `regexp`."
+        "id": "markup-quote",
+        "description": "Helix capture `markup.quote`.",
+        "superType": "markup"
+      },
+      {
+        "id": "markup-raw-inline",
+        "description": "Helix capture `markup.raw.inline`.",
+        "superType": "markup-raw"
+      },
+      {
+        "id": "markup-italic",
+        "description": "Helix capture `markup.italic`.",
+        "superType": "markup"
+      },
+      {
+        "id": "markup-bold",
+        "description": "Helix capture `markup.bold`.",
+        "superType": "markup"
+      },
+      {
+        "id": "markup-strikethrough",
+        "description": "Helix capture `markup.strikethrough`.",
+        "superType": "markup"
+      },
+      {
+        "id": "markup-link-text",
+        "description": "Helix capture `markup.link.text`.",
+        "superType": "markup-link"
       }
     ],
     "semanticTokenScopes": [
       {
         "language": "nix",
         "scopes": {
-          "punctuation": [
-            "punctuation"
+          "type": [
+            "type"
           ],
-          "constant": [
-            "constant.language"
-          ],
-          "constant.numeric": [
-            "constant.numeric"
-          ],
-          "constant.character.escape": [
-            "constant.character.escape"
-          ],
-          "embedded": [
-            "meta.embedded"
-          ],
-          "keyword.operator": [
-            "keyword.operator"
-          ],
-          "variable.member": [
+          "variable-other-member": [
             "variable.other.member"
           ],
-          "variable.builtin": [
-            "variable.language"
+          "constant-builtin-boolean": [
+            "constant.builtin.boolean"
           ],
-          "variable.parameter": [
+          "comment": [
+            "comment"
+          ],
+          "string": [
+            "string"
+          ],
+          "constant-numeric-integer": [
+            "constant.numeric.integer"
+          ],
+          "constant-numeric-float": [
+            "constant.numeric.float"
+          ],
+          "string-special": [
+            "string.special"
+          ],
+          "punctuation-delimiter": [
+            "punctuation.delimiter"
+          ],
+          "operator": [
+            "operator"
+          ],
+          "punctuation-bracket": [
+            "punctuation.bracket"
+          ],
+          "constant-builtin": [
+            "constant.builtin"
+          ],
+          "constant-numeric": [
+            "constant.numeric"
+          ],
+          "constant-character-escape": [
+            "constant.character.escape"
+          ],
+          "punctuation-special": [
+            "punctuation.special"
+          ],
+          "variable": [
+            "variable"
+          ],
+          "variable-parameter": [
             "variable.parameter"
           ],
-          "function.builtin": [
-            "support.function"
+          "variable-builtin": [
+            "variable.builtin"
           ],
-          "string.path": [
-            "string.unquoted.path"
+          "keyword": [
+            "keyword"
           ],
-          "string.uri": [
-            "string.unquoted.uri"
+          "keyword-operator": [
+            "keyword.operator"
           ],
-          "string.regexp": [
+          "keyword-control": [
+            "keyword.control"
+          ],
+          "keyword-control-conditional": [
+            "keyword.control.conditional"
+          ],
+          "keyword-control-exception": [
+            "keyword.control.exception"
+          ],
+          "keyword-function": [
+            "keyword.function"
+          ],
+          "keyword-control-import": [
+            "keyword.control.import"
+          ],
+          "keyword-control-repeat": [
+            "keyword.control.repeat"
+          ],
+          "keyword-control-return": [
+            "keyword.control.return"
+          ],
+          "namespace": [
+            "namespace"
+          ],
+          "function": [
+            "function"
+          ],
+          "function-method": [
+            "function.method"
+          ],
+          "function-builtin": [
+            "function.builtin"
+          ],
+          "constructor": [
+            "constructor"
+          ],
+          "type-builtin": [
+            "type.builtin"
+          ],
+          "constant": [
+            "constant"
+          ],
+          "string-special-path": [
+            "string.special.path"
+          ],
+          "string-special-uri": [
+            "string.special.uri"
+          ],
+          "embedded": [
+            "embedded"
+          ],
+          "label": [
+            "label"
+          ],
+          "constant-character": [
+            "constant.character"
+          ],
+          "string-regexp": [
             "string.regexp"
+          ],
+          "markup-heading-1": [
+            "markup.heading.1"
+          ],
+          "markup-heading-marker": [
+            "markup.heading.marker"
+          ],
+          "markup-heading-2": [
+            "markup.heading.2"
+          ],
+          "markup-heading-3": [
+            "markup.heading.3"
+          ],
+          "markup-heading-4": [
+            "markup.heading.4"
+          ],
+          "markup-heading-5": [
+            "markup.heading.5"
+          ],
+          "markup-heading-6": [
+            "markup.heading.6"
+          ],
+          "markup-raw-block": [
+            "markup.raw.block"
+          ],
+          "markup-link-url": [
+            "markup.link.url"
+          ],
+          "markup-link-label": [
+            "markup.link.label"
+          ],
+          "markup-list-unnumbered": [
+            "markup.list.unnumbered"
+          ],
+          "markup-list-numbered": [
+            "markup.list.numbered"
+          ],
+          "markup-list-checked": [
+            "markup.list.checked"
+          ],
+          "markup-list-unchecked": [
+            "markup.list.unchecked"
+          ],
+          "string-escape": [
+            "string.escape"
+          ],
+          "markup-quote": [
+            "markup.quote"
+          ],
+          "markup-raw-inline": [
+            "markup.raw.inline"
+          ],
+          "markup-italic": [
+            "markup.italic"
+          ],
+          "markup-bold": [
+            "markup.bold"
+          ],
+          "markup-strikethrough": [
+            "markup.strikethrough"
+          ],
+          "markup-link-text": [
+            "markup.link.text"
           ]
         }
       }
@@ -187,6 +515,6 @@
     }
   },
   "scripts": {
-    "test": "node test/check.js"
+    "test": "node test/check.js && node test/worker.js"
   }
 }

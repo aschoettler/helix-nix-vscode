@@ -1,6 +1,6 @@
-// Runs Helix's highlight and injection queries over tree-sitter parses and
-// resolves overlapping captures the way Helix does. No VS Code dependency, so
-// tests can drive it from plain Node.
+// Runs Helix's highlight, locals and injection queries over tree-sitter parses
+// and resolves overlapping captures the way Helix does. No VS Code
+// dependency, so tests can drive it from plain Node.
 
 const fs = require('fs');
 const path = require('path');
@@ -12,33 +12,71 @@ const MAX_INJECTION_DEPTH = 4;
 // Helix's shebang pattern: the interpreter name after an optional path and `env`.
 const SHEBANG = /#!\s*(?:\S*[/\\](?:env\s+(?:-\S+\s+)*)?)?([^\s.\d]+)/;
 
-// A Helix capture name maps to a VS Code token type plus modifiers.
-// `variable.other.member` becomes type `variable`, modifiers `other member`.
-// Theme selectors are `type.modifier...`, so the Helix name works as a key.
-function splitCapture(name) {
-  const [type, ...modifiers] = name.split('.');
-  return { type, modifiers };
+// A Helix capture name becomes a VS Code token type with dots turned into
+// dashes: `variable.other.member` is `variable-other-member`. package.json
+// declares each type with its prefix as superType, so a theme rule for
+// `variable` also colors `variable-other-member`, like Helix's fallback.
+function tokenType(name) {
+  return name.replace(/\./g, '-');
 }
 
-async function loadLanguages() {
+// Capture names that can become tokens. `_` captures are query-internal,
+// `local.*` captures drive scope tracking, and `none` marks text Helix leaves
+// unhighlighted so the color underneath shows through.
+function isHighlight(name) {
+  return !name.startsWith('_') && !name.startsWith('local.') && name !== 'none';
+}
+
+function readQueryText(dir, file) {
+  const p = path.join(dir, file);
+  return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
+}
+
+// Metadata and query text for every bundled language. Grammars compile on
+// first use, so a file only pays for the languages it contains.
+function readLanguages() {
   const meta = JSON.parse(fs.readFileSync(path.join(LANGUAGES, 'languages.json'), 'utf8'));
   const languages = new Map();
   for (const m of meta) {
     const dir = path.join(LANGUAGES, m.name);
-    const language = await Language.load(path.join(dir, 'grammar.wasm'));
-    const readQuery = (file) => {
-      const p = path.join(dir, file);
-      return fs.existsSync(p) ? new Query(language, fs.readFileSync(p, 'utf8')) : null;
-    };
     languages.set(m.name, {
       ...m,
+      dir,
       injectionRegex: m.injectionRegex ? new RegExp(m.injectionRegex) : null,
-      language,
-      highlights: readQuery('highlights.scm'),
-      injections: readQuery('injections.scm'),
+      highlightsText: readQueryText(dir, 'highlights.scm'),
+      injectionsText: readQueryText(dir, 'injections.scm'),
+      localsText: readQueryText(dir, 'locals.scm'),
+      loaded: null,
     });
   }
   return languages;
+}
+
+// Every name a query can emit as a highlight: its own captures, plus the
+// highlight a local definition passes to its references.
+function highlightNames(lang) {
+  const names = new Set();
+  for (const text of [lang.highlightsText, lang.localsText]) {
+    for (const [, name] of (text ?? '').matchAll(/@([A-Za-z_][\w.-]*)/g)) {
+      const def = name.match(/^local\.definition\.(.+)$/);
+      if (def) names.add(def[1]);
+      else if (isHighlight(name)) names.add(name);
+    }
+  }
+  return names;
+}
+
+async function loadLanguage(lang) {
+  const language = await Language.load(path.join(lang.dir, 'grammar.wasm'));
+  // Helix appends the locals query to the highlight query, so its
+  // `local.reference` pattern outranks the highlight patterns.
+  const highlightsText = [lang.highlightsText, lang.localsText].filter(Boolean).join('\n');
+  lang.loaded = {
+    language,
+    highlights: highlightsText ? new Query(language, highlightsText) : null,
+    locals: lang.localsText ? new Query(language, lang.localsText) : null,
+    injections: lang.injectionsText ? new Query(language, lang.injectionsText) : null,
+  };
 }
 
 // Helix resolves an injection language from a name set by the query, or from
@@ -57,6 +95,51 @@ function resolveLanguage(languages, marker) {
     case 'shebang':
       return all.find((l) => l.shebangs.includes(marker.text));
   }
+}
+
+// Scopes and definitions from a locals query, as Helix tracks them. A
+// reference resolves to a definition in its scope or an inheriting parent,
+// if the definition ends before the reference starts.
+function buildLocals(query, tree) {
+  const root = { start: 0, end: Infinity, parent: null, inherit: false, defs: new Map() };
+  const scopes = [root];
+  let scope = root;
+  for (const match of query.matches(tree.rootNode)) {
+    for (const { name, node } of match.captures) {
+      while (node.startIndex >= scope.end) scope = scope.parent;
+      if (name === 'local.scope') {
+        const props = match.setProperties || {};
+        scope = {
+          start: node.startIndex,
+          end: node.endIndex,
+          parent: scope,
+          inherit: props['local.scope-inherits'] !== 'false',
+          defs: new Map(),
+        };
+        scopes.push(scope);
+      } else if (name.startsWith('local.definition.')) {
+        scope.defs.set(node.text, {
+          highlight: name.slice('local.definition.'.length),
+          end: node.endIndex,
+        });
+      }
+    }
+  }
+  return {
+    lookup(node) {
+      let inner = root;
+      for (const s of scopes) {
+        if (s.start <= node.startIndex && node.endIndex <= s.end && s.end - s.start <= inner.end - inner.start) {
+          inner = s;
+        }
+      }
+      for (let s = inner; s; s = s.inherit ? s.parent : null) {
+        const def = s.defs.get(node.text);
+        if (def) return def.end <= node.startIndex ? def : null;
+      }
+      return null;
+    },
+  };
 }
 
 // The text a content node contributes: its range minus its children, unless
@@ -87,9 +170,7 @@ function contentRanges(node, includeChildren) {
 // language. A match with several content nodes is one layer. Otherwise each
 // content node is its own layer. On an identical node range, the last match
 // wins.
-function injectionLayers(languages, lang, tree) {
-  const query = lang.injections;
-  if (!query) return [];
+function injectionLayers(languages, query, tree) {
   const byRange = new Map();
   query.matches(tree.rootNode).forEach((match, matchIndex) => {
     const props = match.setProperties || {};
@@ -133,8 +214,8 @@ function injectionLayers(languages, lang, tree) {
   });
 
   const layers = new Map();
-  for (const { scope, lang: target, ranges } of byRange.values()) {
-    const layer = layers.get(scope) ?? { lang: target, ranges: [] };
+  for (const { scope, lang, ranges } of byRange.values()) {
+    const layer = layers.get(scope) ?? { lang, ranges: [] };
     layer.ranges.push(...ranges);
     layers.set(scope, layer);
   }
@@ -144,48 +225,53 @@ function injectionLayers(languages, lang, tree) {
 
 async function createHighlighter() {
   await Parser.init();
-  const languages = await loadLanguages();
+  const languages = readLanguages();
   const parser = new Parser();
 
-  // One legend across all languages. Each capture name gets a global id.
+  // One legend across all languages. Each highlight name gets a global id.
   const captureIds = new Map();
   const legend = { types: [], modifiers: [] };
   for (const lang of languages.values()) {
-    for (const name of lang.highlights?.captureNames ?? []) {
-      // `_` captures are query-internal. `none` marks text Helix leaves
-      // unhighlighted, so the color underneath shows through.
-      if (name.startsWith('_') || name === 'none' || captureIds.has(name)) continue;
-      const split = splitCapture(name);
-      if (!legend.types.includes(split.type)) legend.types.push(split.type);
-      for (const m of split.modifiers) if (!legend.modifiers.includes(m)) legend.modifiers.push(m);
-      captureIds.set(name, captureIds.size);
+    for (const name of highlightNames(lang)) {
+      if (captureIds.has(name)) continue;
+      captureIds.set(name, legend.types.length);
+      legend.types.push(tokenType(name));
     }
   }
-  const encoded = [...captureIds.keys()].map((name) => {
-    const split = splitCapture(name);
-    let bits = 0;
-    for (const m of split.modifiers) bits |= 1 << legend.modifiers.indexOf(m);
-    return [legend.types.indexOf(split.type), bits];
-  });
 
   // Paints one layer, then the layers it injects on top of it. `ranges` is
-  // null for the document's own layer.
-  function paintLayer(owner, text, lang, ranges, depth) {
-    parser.setLanguage(lang.language);
+  // null for the document's own layer. Injected languages not yet loaded
+  // are added to `missing` and skipped.
+  function paintLayer(owner, text, lang, ranges, depth, missing) {
+    const { language, highlights, locals, injections } = lang.loaded;
+    parser.setLanguage(language);
     const tree = parser.parse(text, null, ranges ? { includedRanges: ranges } : undefined);
+    const scopes = locals ? buildLocals(locals, tree) : null;
 
     // Helix's rule: for the same range, the highest pattern index wins, and
     // within one pattern the later capture wins. A nested range colors its
     // own text over the range around it. Painting wide ranges first, then
     // ascending pattern index, gives both.
     const spans = [];
-    const captures = lang.highlights ? lang.highlights.captures(tree.rootNode) : [];
-    captures.forEach((c, order) => {
-      const id = captureIds.get(c.name);
-      if (id === undefined) return;
-      spans.push({ start: c.node.startIndex, end: c.node.endIndex, pattern: c.patternIndex, order, id });
-    });
-    const injected = depth < MAX_INJECTION_DEPTH ? injectionLayers(languages, lang, tree) : [];
+    let order = 0;
+    for (const match of highlights ? highlights.matches(tree.rootNode) : []) {
+      // With locals, a `(#is-not? local)` pattern does not match a local.
+      if (scopes && 'local' in (match.refutedProperties || {})) {
+        if (match.captures.some((c) => scopes.lookup(c.node))) continue;
+      }
+      for (const { name, node } of match.captures) {
+        let highlight = name;
+        if (name === 'local.reference') {
+          const def = scopes && scopes.lookup(node);
+          if (!def) continue;
+          highlight = def.highlight;
+        }
+        const id = captureIds.get(highlight);
+        if (id === undefined) continue;
+        spans.push({ start: node.startIndex, end: node.endIndex, pattern: match.patternIndex, order: order++, id });
+      }
+    }
+    const injected = injections && depth < MAX_INJECTION_DEPTH ? injectionLayers(languages, injections, tree) : [];
     // Capture nodes point into the tree, so free it only after reading them.
     tree.delete();
 
@@ -210,14 +296,26 @@ async function createHighlighter() {
       }
     }
 
-    for (const layer of injected) paintLayer(owner, text, layer.lang, layer.ranges, depth + 1);
+    for (const layer of injected) {
+      if (!layer.lang.loaded) missing.add(layer.lang);
+      else paintLayer(owner, text, layer.lang, layer.ranges, depth + 1, missing);
+    }
   }
 
-  // Emits [line, char, length, typeIndex, modifierBits] runs, split at line
+  // Emits [line, char, length, typeIndex, 0] runs, split at line
   // ends because VS Code tokens cannot span lines.
-  function tokens(text, languageName = 'nix') {
-    const owner = new Int32Array(text.length).fill(-1);
-    paintLayer(owner, text, languages.get(languageName), null, 0);
+  async function tokens(text, languageName = 'nix') {
+    const root = languages.get(languageName);
+    if (!root.loaded) await loadLanguage(root);
+    let owner;
+    for (;;) {
+      owner = new Int32Array(text.length).fill(-1);
+      const missing = new Set();
+      paintLayer(owner, text, root, null, 0, missing);
+      if (missing.size === 0) break;
+      await Promise.all([...missing].map(loadLanguage));
+    }
+
     const out = [];
     let line = 0;
     let lineStart = 0;
@@ -235,14 +333,32 @@ async function createHighlighter() {
       if (id !== -1) {
         let end = j;
         if (text.charCodeAt(end - 1) === 13) end--;
-        if (end > i) out.push([line, i - lineStart, end - i, ...encoded[id]]);
+        if (end > i) out.push([line, i - lineStart, end - i, id, 0]);
       }
       i = j;
     }
     return out;
   }
 
-  return { legend, tokens };
+  return { legend, tokens, languages };
 }
 
-module.exports = { createHighlighter, splitCapture };
+// Packs absolute [line, char, length, type, modifiers] tokens into VS Code's
+// relative encoding: each token's line and start are deltas from the previous.
+function encode(tokens) {
+  const data = new Uint32Array(tokens.length * 5);
+  let prevLine = 0;
+  let prevChar = 0;
+  tokens.forEach(([line, char, length, type, modifiers], i) => {
+    data[i * 5] = line - prevLine;
+    data[i * 5 + 1] = line === prevLine ? char - prevChar : char;
+    data[i * 5 + 2] = length;
+    data[i * 5 + 3] = type;
+    data[i * 5 + 4] = modifiers;
+    prevLine = line;
+    prevChar = char;
+  });
+  return data;
+}
+
+module.exports = { createHighlighter, tokenType, encode };

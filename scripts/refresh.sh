@@ -11,4 +11,5 @@ rm -rf languages
 cp -r "$out/languages" languages
 chmod -R u+w languages
 install -m 644 "$out/SOURCES" SOURCES
+node scripts/declare-tokens.js
 cat SOURCES

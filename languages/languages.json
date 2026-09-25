@@ -1,5 +1,64 @@
 [
   {
+    "name": "toml",
+    "injectionRegex": "toml",
+    "shebangs": [],
+    "fileTypes": [
+      "toml"
+    ]
+  },
+  {
+    "name": "json",
+    "injectionRegex": "json",
+    "shebangs": [],
+    "fileTypes": [
+      "json",
+      "arb",
+      "ipynb",
+      "geojson",
+      "gltf",
+      "webmanifest",
+      "js.map",
+      "ts.map",
+      "css.map",
+      "jsonl",
+      "avsc",
+      "ldtk",
+      "ldtkl",
+      "sublime-build",
+      "sublime-color-scheme",
+      "sublime-commands",
+      "sublime-completions",
+      "sublime-keymap",
+      "sublime-macro",
+      "sublime-menu",
+      "sublime-mousemap",
+      "sublime-project",
+      "sublime-settings",
+      "sublime-theme",
+      "sublime-workspace"
+    ]
+  },
+  {
+    "name": "python",
+    "injectionRegex": "py(thon)?",
+    "shebangs": [
+      "python",
+      "uv"
+    ],
+    "fileTypes": [
+      "py",
+      "pyi",
+      "py3",
+      "pyw",
+      "ptl",
+      "rpy",
+      "cpy",
+      "ipy",
+      "pyt"
+    ]
+  },
+  {
     "name": "nix",
     "injectionRegex": "nix",
     "shebangs": [],
@@ -38,6 +97,39 @@
       "tcshrc",
       "bashrc_Apple_Terminal",
       "zshrc_Apple_Terminal"
+    ]
+  },
+  {
+    "name": "markdown",
+    "injectionRegex": "md|markdown",
+    "shebangs": [],
+    "fileTypes": [
+      "md",
+      "livemd",
+      "markdown",
+      "mdx",
+      "mkd",
+      "mkdn",
+      "mdwn",
+      "mdown",
+      "markdn",
+      "mdtxt",
+      "mdtext",
+      "workbook"
+    ]
+  },
+  {
+    "name": "markdown.inline",
+    "injectionRegex": "markdown\\.inline",
+    "shebangs": [],
+    "fileTypes": []
+  },
+  {
+    "name": "regex",
+    "injectionRegex": "regex",
+    "shebangs": [],
+    "fileTypes": [
+      "regex"
     ]
   }
 ]

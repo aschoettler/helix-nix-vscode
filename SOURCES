@@ -1,3 +1,9 @@
 helix 25.07.1
 tree-sitter-nix 1b69cf1fa92366eefbe6863c184e5d2ece5f187d
 tree-sitter-bash 487734f87fd87118028a65a4599352fa99c9cde8
+tree-sitter-python 4bfdd9033a2225cc95032ce77066b7aeca9e2efc
+tree-sitter-json 73076754005a460947cafe8e03a8cf5fa4fa2938
+tree-sitter-toml 7cff70bbcbbc62001b465603ca1ea88edd668704
+tree-sitter-regex e1cfca3c79896ff79842f057ea13e529b66af636
+tree-sitter-markdown 62516e8c78380e3b51d5b55727995d2c511436d8
+tree-sitter-markdown_inline 62516e8c78380e3b51d5b55727995d2c511436d8
